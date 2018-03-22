@@ -3,7 +3,9 @@
 
 #include <QDebug>
 
-LoginDialog::LoginDialog(Authentication_manager *authentication_manager, QWidget *parent) :
+//------------------------------------------------------------------------------
+/// Constructor - Loads users and adds to combo box
+Login_dialog::Login_dialog(Authentication_manager *authentication_manager, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::LoginDialog),
     _authenticaton_manager(authentication_manager)
@@ -20,26 +22,39 @@ LoginDialog::LoginDialog(Authentication_manager *authentication_manager, QWidget
 
         ui->combo_username->addItem(QString("%1 [%2]").arg(iter.key()).arg(role), iter.key());
     }
+    ui->edit_password->setFocus();
 }
 
-LoginDialog::~LoginDialog()
+//------------------------------------------------------------------------------
+Login_dialog::~Login_dialog()
 {
-    delete _authenticaton_manager;
     delete ui;
 }
 
-void LoginDialog::on_btn_login_clicked()
+//------------------------------------------------------------------------------
+/// Handles user pressing Login button. Validates login and hides dialog
+void Login_dialog::on_btn_login_clicked()
 {
     qDebug() << ui->combo_username->currentData() << ui->edit_password->text();
     Login_result result = _authenticaton_manager->authenticate(ui->combo_username->currentData().toString(), ui->edit_password->text());
     switch (result) {
     case LOGIN_RESULT_SUCCESS         :
         ui->label_result->setText("Success");
-        hide();
+
+        /// Onky hide dialog / accept if user authenticated
+        accept();
         break;
-    case LOGIN_RESULT_INVALID_USER    : ui->label_result->setText("Invalid User"); break;
-    case LOGIN_RESULT_INVALID_PASSWORD: ui->label_result->setText("Incorrect Password"); break;
+    case LOGIN_RESULT_INVALID_USER     : ui->label_result->setText("Invalid User"); break;
+    case LOGIN_RESULT_INVALID_PASSWORD : ui->label_result->setText("Incorrect Password"); break;
+    case LOGIN_RESULT_ALREADY_LOGGED_IN: ui->label_result->setText("Already logged in"); break;
     }
 
     qDebug() << result;
+}
+
+//------------------------------------------------------------------------------
+/// Handles user pressing the Cancel button
+void Login_dialog::on_btn_cancel_clicked()
+{
+    reject();
 }

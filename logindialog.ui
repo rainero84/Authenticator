@@ -48,7 +48,7 @@
    <item row="3" column="0" colspan="2">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="btn_cancel">
        <property name="text">
         <string>Cancel</string>
        </property>
@@ -65,6 +65,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>combo_username</tabstop>
+  <tabstop>edit_password</tabstop>
+  <tabstop>btn_cancel</tabstop>
+  <tabstop>btn_login</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

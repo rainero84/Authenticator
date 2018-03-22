@@ -11,6 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Authenticator
 TEMPLATE = app
 
+DEFINES += QT_LOGGING_RULES="*.debug=false"
+
 
 SOURCES += main.cpp\
         mainwindow.cpp \

@@ -9,20 +9,25 @@ namespace Ui {
 class LoginDialog;
 }
 
-class LoginDialog : public QDialog
+class Login_dialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit LoginDialog(Authentication_manager* authentication_manager, QWidget *parent = 0);
-    ~LoginDialog();
+    explicit Login_dialog(Authentication_manager* authentication_manager, QWidget *parent = 0);
+    ~Login_dialog();
 
 private slots:
+    /// Handles user pressing Login button
     void on_btn_login_clicked();
+
+    /// Handles user pressing the Cancel button
+    void on_btn_cancel_clicked();
 
 private:
     Ui::LoginDialog *ui;
 
+    /// Pointer to the Authentication_manager
     Authentication_manager* _authenticaton_manager;
 };
 

@@ -19,7 +19,8 @@ typedef QMap<QString,User_role> User_map;
 typedef enum {
     LOGIN_RESULT_SUCCESS = 0,
     LOGIN_RESULT_INVALID_USER = 1,
-    LOGIN_RESULT_INVALID_PASSWORD = 2
+    LOGIN_RESULT_INVALID_PASSWORD = 2,
+    LOGIN_RESULT_ALREADY_LOGGED_IN = 3
 } Login_result;
 
 /// @enum Add_user_result enumerate the possible user-add results
@@ -82,8 +83,23 @@ public:
     /// Changes the role of a user
     Modify_result change_role(QString username, User_role new_role);
 
+    /// Removes the specifies user
+    void remove_user(QString username);
+
+    /// Gets the role of the specified user
+    bool get_user_role(QString username, User_role & role);
+
+    /// Determines if currently logged in
+    bool logged_in();
+
+    /// Returns the username of the currently logged in user
+    QString get_logged_in_user_name();
+
 
 signals:
+    /// Signal indicating that a user has been added or modified
+    void signal_users_updated();
+
     /// Signal notifying that a user has been authenticated
     void signal_user_authenticated(QString username, User_role role);
 

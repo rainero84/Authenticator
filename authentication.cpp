@@ -41,35 +41,42 @@ User_map Authentication_manager::get_available_users() {
 //------------------------------------------------------------------------------
 /// Authenticates the specified user with the specified password
 Login_result Authentication_manager::authenticate(QString username, QString password) {
-    QCryptographicHash hasher(QCryptographicHash::Sha256);
-    hasher.addData(password.toLocal8Bit());
-
     Login_result login_result = LOGIN_RESULT_INVALID_USER;
-    if (_all_users.find(username) != _all_users.end()) {
-        User_details* user_details = _all_users[username];
+    if (_authentication_state == AUTHENTICATION_STATE_NOT_AUTHENTICATED) {
+        QCryptographicHash hasher(QCryptographicHash::Sha256);
+        hasher.addData(password.toLocal8Bit());
 
-        QString hash = hasher.result().toBase64();
-        QString expected_hash = user_details->password_hash;
+        if (_all_users.find(username) != _all_users.end()) {
+            User_details* user_details = _all_users[username];
 
-        if (hash == expected_hash) {
-            qDebug() << "User" << username << "authenticated";
-            login_result = LOGIN_RESULT_SUCCESS;
-            _current_user = user_details;
+            QString hash = hasher.result().toBase64();
+            QString expected_hash = user_details->password_hash;
 
-            emit signal_user_authenticated(_current_user->username, _current_user->user_role);
+            if (hash == expected_hash) {
+                qDebug() << "User" << username << "authenticated";
+                login_result = LOGIN_RESULT_SUCCESS;
+                _current_user = user_details;
+                _authentication_state = AUTHENTICATION_STATE_AUTHENTICATED;
 
+                emit signal_user_authenticated(_current_user->username, _current_user->user_role);
+
+            } else {
+
+                qDebug() << "User" << username << "password incorrect";
+                login_result = LOGIN_RESULT_INVALID_PASSWORD;
+
+                emit signal_user_authentication_failed(username, login_result);
+            }
         } else {
-
-            qDebug() << "User" << username << "password incorrect";
-            login_result = LOGIN_RESULT_INVALID_PASSWORD;
+            qDebug() << "User" << username << "is not valid";
+            login_result = LOGIN_RESULT_INVALID_USER;
 
             emit signal_user_authentication_failed(username, login_result);
         }
-    } else {
-        qDebug() << "User" << username << "is not valid";
-        login_result = LOGIN_RESULT_INVALID_USER;
 
-        emit signal_user_authentication_failed(username, login_result);
+    } else {
+        login_result = LOGIN_RESULT_ALREADY_LOGGED_IN;
+        qDebug() << "Already logged in";
     }
     return login_result;
 }
@@ -78,9 +85,9 @@ Login_result Authentication_manager::authenticate(QString username, QString pass
 /// Logs out the current user
 void Authentication_manager::logout() {
     if (_authentication_state == AUTHENTICATION_STATE_AUTHENTICATED) {
-        _current_user = NULL;
         QString username = _current_user->username;
         _authentication_state = AUTHENTICATION_STATE_NOT_AUTHENTICATED;
+        _current_user = NULL;
         emit signal_user_logged_out(username);
     }
 }
@@ -110,6 +117,9 @@ Add_user_result Authentication_manager::add_user(QString username, QString defau
             _all_users[username] = details;
 
             _save_users();
+
+            // Notify interested parties that the users have been updated
+            emit signal_users_updated();
         }
     } else {
         qDebug() << "User is not an administrator, can't add user";
@@ -134,6 +144,9 @@ Modify_result Authentication_manager::change_current_user_password(QString new_p
 
             _save_users();
 
+            // Notify interested parties that the users have been updated
+            emit signal_users_updated();
+
         } else {
             result = MODIFY_RESULT_PERMISSION_DENIED;
         }
@@ -150,9 +163,9 @@ Modify_result Authentication_manager::change_password(QString username, QString 
 
     if (_authentication_state == AUTHENTICATION_STATE_AUTHENTICATED) {
         if (_current_user != NULL) {
-            qDebug() << "Updating password of" << _current_user->username;
+            qDebug() << "Updating password of" << username;
 
-            if (_current_user->user_role == USER_ROLE_ADMINISTRATOR && _current_user->username == username) {
+            if (_current_user->user_role == USER_ROLE_ADMINISTRATOR || _current_user->username == username) {
                 if (_all_users.contains(username)) {
                     qDebug() << "Updating password of" << username;
 
@@ -162,6 +175,9 @@ Modify_result Authentication_manager::change_password(QString username, QString 
                     _all_users[username]->password_hash = hasher.result().toBase64();
 
                     _save_users();
+
+                    // Notify interested parties that the users have been updated
+                    emit signal_users_updated();
                 } else {
                     qDebug() << "Could not find user" << username;
                     result = MODIFY_RESULT_USER_NOT_FOUND;
@@ -187,13 +203,16 @@ Modify_result Authentication_manager::change_role(QString username, User_role ne
         if (_current_user != NULL) {
             qDebug() << "Updating password of" << _current_user->username;
 
-            if (_current_user->user_role == USER_ROLE_ADMINISTRATOR && _current_user->username == username) {
+            if (_current_user->user_role == USER_ROLE_ADMINISTRATOR) {
                 if (_all_users.contains(username)) {
                     qDebug() << "Updating role of" << username;
 
-                    _all_users[username]->password_hash = new_role;
+                    _all_users[username]->user_role = new_role;
 
                     _save_users();
+
+                    // Notify interested parties that the users have been updated
+                    emit signal_users_updated();
                 } else {
                     qDebug() << "Could not find user" << username;
                     result = MODIFY_RESULT_USER_NOT_FOUND;
@@ -208,6 +227,54 @@ Modify_result Authentication_manager::change_role(QString username, User_role ne
         result = MODIFY_RESULT_NOT_LOGGED_IN;
     }
     return result;
+}
+
+//------------------------------------------------------------------------------
+/// Removes the specifies user
+void Authentication_manager::remove_user(QString username) {
+    if (_all_users.contains(username)) {
+        if (_all_users[username]->user_role != USER_ROLE_ADMINISTRATOR) {
+            _all_users.remove(username);
+
+            _save_users();
+
+            // Notify interested parties that the users have been updated
+            emit signal_users_updated();
+        } else {
+            qWarning() << "Cannot remove administrator";
+        }
+
+    } else {
+        qDebug() << "User" << username << "not found";
+    }
+}
+
+//------------------------------------------------------------------------------
+/// Gets the role of the specified user
+bool Authentication_manager::get_user_role(QString username, User_role & role) {
+    if (_all_users.contains(username)) {
+        role = _all_users[username]->user_role;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+//------------------------------------------------------------------------------
+/// Determines if currently logged in
+bool Authentication_manager::logged_in() {
+    return _authentication_state == AUTHENTICATION_STATE_AUTHENTICATED;
+}
+
+//------------------------------------------------------------------------------
+/// Returns the username of the currently logged in user
+QString Authentication_manager::get_logged_in_user_name() {
+    if (_authentication_state == AUTHENTICATION_STATE_AUTHENTICATED && _current_user != NULL) {
+        return _current_user->username;
+    } else {
+        return "";
+    }
 }
 
 //------------------------------------------------------------------------------
