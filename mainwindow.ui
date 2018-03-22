@@ -27,7 +27,6 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionLogin"/>
     <addaction name="actionLogout"/>
     <addaction name="separator"/>
     <addaction name="actionManage_Users"/>
@@ -44,11 +43,6 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionLogin">
-   <property name="text">
-    <string>Login</string>
-   </property>
-  </action>
   <action name="actionManage_Users">
    <property name="text">
     <string>Manage Users</string>

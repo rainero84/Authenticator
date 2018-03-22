@@ -7,9 +7,10 @@
 
 /// @enum User_type
 typedef enum {
-    USER_ROLE_ADMINISTRATOR,
-    USER_ROLE_ENGINEER,
-    USER_ROLE_USER
+    USER_ROLE_UNSPECIFIED = -1,
+    USER_ROLE_ADMINISTRATOR = 0,
+    USER_ROLE_ENGINEER = 1,
+    USER_ROLE_USER = 2
 } User_role;
 
 typedef QMap<QString,User_role> User_map;
@@ -94,6 +95,9 @@ public:
 
     /// Returns the username of the currently logged in user
     QString get_logged_in_user_name();
+
+    /// Returns the role of the currently logged in user
+    User_role get_logged_in_user_role();
 
 
 signals:

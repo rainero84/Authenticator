@@ -116,6 +116,7 @@ void User_management::_refresh() {
         case USER_ROLE_ADMINISTRATOR: table_row->setText("Administrator"); break;
         case USER_ROLE_ENGINEER     : table_row->setText("Engineer"); break;
         case USER_ROLE_USER         : table_row->setText("User"); break;
+        case USER_ROLE_UNSPECIFIED  : table_row->setText("<Unspecified>"); break;
         }
 
 

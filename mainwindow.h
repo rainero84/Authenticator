@@ -16,24 +16,13 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(Authentication_manager *authentication_manager, QWidget *parent = 0);
     ~MainWindow();
 
 private slots:
-    /// Signal indicating that the user is attempting to log in
-    void on_actionLogin_triggered();
 
     /// Signal indicating that the user management is to be started
     void on_actionManage_Users_triggered();
-
-    /// Signal notifying that a user has been authenticated
-    void slot_user_authenticated(QString username, User_role role);
-
-    /// Signal notifying that a user has been authenticated
-    void slot_user_authentication_failed(QString username, Login_result result);
-
-    /// Signal notifying that a user has been logged out
-    void slot_user_logged_out(QString username);
 
     /// Slot for handling the current user password change
     void slot_user_password_change(QString username, QString password);

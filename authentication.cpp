@@ -278,6 +278,17 @@ QString Authentication_manager::get_logged_in_user_name() {
 }
 
 //------------------------------------------------------------------------------
+/// Returns the role of the currently logged in user
+User_role Authentication_manager::get_logged_in_user_role() {
+    if (_authentication_state == AUTHENTICATION_STATE_AUTHENTICATED && _current_user != NULL) {
+        return _current_user->user_role;
+    } else {
+        qWarning() << "Not logged in";
+        return USER_ROLE_UNSPECIFIED;
+    }
+}
+
+//------------------------------------------------------------------------------
 /// Loads the list of all available users
 bool Authentication_manager::_load_users() {
     qDebug() << "Loading all users";

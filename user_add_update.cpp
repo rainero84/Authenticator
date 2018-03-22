@@ -6,6 +6,7 @@ const QString UNMODIFIED_PASSWORD = "*******************";
 const QString USER_ADMINISTRATOR_STR = "Administrator";
 const QString USER_ENGINEER_STR = "Engineer";
 const QString USER_USER_STR = "User";
+const QString USER_UNSPECIFIED_STR = "<Unspecified>";
 
 //------------------------------------------------------------------------------
 /// Constructor for adding a new user
@@ -59,6 +60,7 @@ User_add_update::User_add_update(QString username, User_role role, QWidget *pare
     case USER_ROLE_ADMINISTRATOR: ui->combo_role->setCurrentText(USER_ADMINISTRATOR_STR); break;
     case USER_ROLE_ENGINEER:      ui->combo_role->setCurrentText(USER_ENGINEER_STR); break;
     case USER_ROLE_USER:          ui->combo_role->setCurrentText(USER_USER_STR); break;
+    case USER_ROLE_UNSPECIFIED:   ui->combo_role->setCurrentText(USER_UNSPECIFIED_STR); break;
     }
 
     ui->edit_password->setText(UNMODIFIED_PASSWORD);
