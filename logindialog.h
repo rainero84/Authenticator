@@ -18,6 +18,9 @@ public:
     explicit Login_dialog(QWidget *parent = 0);
     ~Login_dialog();
 
+    /// Handles user key press
+    void keyPressEvent(QKeyEvent* event);
+
 private slots:
     /// Handles user pressing Login button
     void on_btn_login_clicked();
@@ -25,15 +28,21 @@ private slots:
     /// Handles user pressing the Cancel button
     void on_btn_cancel_clicked();
 
-    /// Signal notifying that a user has been authenticated
+    /// Slot handling that a user has been authenticated
     void slot_user_authenticated(QString username, User_role role);
 
-    /// Signal notifying that a user has been authenticated
+    /// Slot handling that a user has been authenticated
     void slot_user_authentication_failed(QString username, Login_result result);
 
-    /// Signal notifying that a user has been logged out
+    /// Slot handling user being logged out
     void slot_user_logged_out(QString username);
+
+    /// Slot handling updated users
+    void slot_users_updated();
 private:
+    /// Updates the displayed users
+    void _refesh_users();
+
     Ui::LoginDialog *ui;
 
     /// Pointer to the Authentication_manager

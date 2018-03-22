@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QMap>
+#include <QSettings>
 
 /// @enum User_type
 typedef enum {
@@ -99,6 +100,12 @@ public:
     /// Returns the role of the currently logged in user
     User_role get_logged_in_user_role();
 
+    /// Restores users from file
+    void restore_from_file(QString filename);
+
+    /// Saves users from file
+    void save_to_file(QString filename);
+
 
 signals:
     /// Signal indicating that a user has been added or modified
@@ -117,10 +124,10 @@ public slots:
 
 private:
     /// Loads the list of all available users
-    bool _load_users();
+    bool _load_users(QSettings& settings);
 
     /// Saves the list of all available users
-    bool _save_users();
+    bool _save_users(QSettings& settings);
 
     /// Current state of authentication
     Authentication_state _authentication_state;

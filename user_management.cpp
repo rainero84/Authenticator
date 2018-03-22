@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QTableWidgetItem>
+#include <QFileDialog>
 
 //------------------------------------------------------------------------------
 /// Constructor. Refreshes current user list
@@ -124,4 +125,39 @@ void User_management::_refresh() {
     }
 
     ui->table_users->resizeRowsToContents();
+}
+
+//------------------------------------------------------------------------------
+/// Restores users from a file
+void User_management::on_btn_restore_clicked()
+{
+    QString filename;
+    QString directory = QDir::currentPath();
+    QString filter = "Backup Files (*.bak)";
+
+    filename = QFileDialog::getOpenFileName(this, "Select Restore File", directory, filter);;
+
+    if (!filename.isEmpty()) {
+        qDebug() << "Restoring users from" << filename;
+        _authentication_manager->restore_from_file(filename);
+    }
+}
+
+//------------------------------------------------------------------------------
+/// Saves users to a file
+void User_management::on_btn_export_clicked()
+{
+    QString filename;
+    QString directory = QDir::currentPath();
+    QString filter = "Backup Files (*.bak)";
+
+    filename = QFileDialog::getSaveFileName(this, "Select Restore File", directory, filter);
+    if (!filename.endsWith("bak")) {
+        filename.append(".bak");
+    }
+
+    if (!filename.isEmpty()) {
+        qDebug() << "Saving users from" << filename;
+        _authentication_manager->save_to_file(filename);
+    }
 }

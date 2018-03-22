@@ -13,7 +13,6 @@ TEMPLATE = app
 
 DEFINES += QT_LOGGING_RULES="*.debug=true"
 
-
 SOURCES += main.cpp\
         mainwindow.cpp \
     logindialog.cpp \

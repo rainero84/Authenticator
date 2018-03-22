@@ -47,6 +47,12 @@ private slots:
     /// Handles an update to users, which refreshes the list of users
     void slot_users_updated();
 
+    /// Restores users from a file
+    void on_btn_restore_clicked();
+
+    /// Saves users to a file
+    void on_btn_export_clicked();
+
 private:
     /// Refreshes the list of users
     void _refresh();

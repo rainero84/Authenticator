@@ -16,7 +16,8 @@ Authentication_manager::Authentication_manager(QObject *parent) : QObject(parent
     _authentication_state = AUTHENTICATION_STATE_NOT_AUTHENTICATED;
     _current_user = NULL;
 
-    _load_users();
+    QSettings settings_reg(ORGANISATION, APPLICATION_NAME, this);
+    _load_users(settings_reg);
 }
 
 //------------------------------------------------------------------------------
@@ -116,7 +117,8 @@ Add_user_result Authentication_manager::add_user(QString username, QString defau
 
             _all_users[username] = details;
 
-            _save_users();
+            QSettings settings_reg(ORGANISATION, APPLICATION_NAME, this);
+            _save_users(settings_reg);
 
             // Notify interested parties that the users have been updated
             emit signal_users_updated();
@@ -142,7 +144,8 @@ Modify_result Authentication_manager::change_current_user_password(QString new_p
             hasher.addData(new_password.toLocal8Bit());
             _current_user->password_hash = hasher.result().toBase64();
 
-            _save_users();
+            QSettings settings_reg(ORGANISATION, APPLICATION_NAME, this);
+            _save_users(settings_reg);
 
             // Notify interested parties that the users have been updated
             emit signal_users_updated();
@@ -174,7 +177,8 @@ Modify_result Authentication_manager::change_password(QString username, QString 
                     hasher.addData(new_password.toLocal8Bit());
                     _all_users[username]->password_hash = hasher.result().toBase64();
 
-                    _save_users();
+                    QSettings settings_reg(ORGANISATION, APPLICATION_NAME, this);
+                    _save_users(settings_reg);
 
                     // Notify interested parties that the users have been updated
                     emit signal_users_updated();
@@ -209,7 +213,8 @@ Modify_result Authentication_manager::change_role(QString username, User_role ne
 
                     _all_users[username]->user_role = new_role;
 
-                    _save_users();
+                    QSettings settings_reg(ORGANISATION, APPLICATION_NAME, this);
+                    _save_users(settings_reg);
 
                     // Notify interested parties that the users have been updated
                     emit signal_users_updated();
@@ -236,7 +241,8 @@ void Authentication_manager::remove_user(QString username) {
         if (_all_users[username]->user_role != USER_ROLE_ADMINISTRATOR) {
             _all_users.remove(username);
 
-            _save_users();
+            QSettings settings_reg(ORGANISATION, APPLICATION_NAME, this);
+            _save_users(settings_reg);
 
             // Notify interested parties that the users have been updated
             emit signal_users_updated();
@@ -289,13 +295,31 @@ User_role Authentication_manager::get_logged_in_user_role() {
 }
 
 //------------------------------------------------------------------------------
+/// Restores users from file
+void Authentication_manager::restore_from_file(QString filename) {
+    QSettings settings_restore_file(filename, QSettings::IniFormat, this);
+    _load_users(settings_restore_file);
+
+    QSettings settings_reg(ORGANISATION, APPLICATION_NAME, this);
+    _save_users(settings_reg);
+}
+
+//------------------------------------------------------------------------------
+/// Saves users from file
+void Authentication_manager::save_to_file(QString filename) {
+    QSettings settings_restore_file(filename, QSettings::IniFormat, this);
+    _save_users(settings_restore_file);
+}
+
+//------------------------------------------------------------------------------
 /// Loads the list of all available users
-bool Authentication_manager::_load_users() {
+bool Authentication_manager::_load_users(QSettings& settings) {
     qDebug() << "Loading all users";
 
-    // Reset authentication state
-    _authentication_state = AUTHENTICATION_STATE_NOT_AUTHENTICATED;
-    _current_user = NULL;
+    if (_current_user != NULL || _authentication_state == AUTHENTICATION_STATE_AUTHENTICATED) {
+        qDebug() << "Logging out" << _current_user->username;
+        logout();
+    }
 
     // Delete existing users
     while (!_all_users.isEmpty()) {
@@ -305,12 +329,12 @@ bool Authentication_manager::_load_users() {
 
     bool success = true;
 
-    // Create settings reader
-    QSettings settings(ORGANISATION, APPLICATION_NAME, this);
     settings.beginGroup("Passwords");
 
     // Get details of all users
     QList<QString> users = settings.allKeys();
+
+    bool admin_found = false;
 
     // Iterate though all settings and
     foreach(QString user_details_name, users) {
@@ -326,6 +350,8 @@ bool Authentication_manager::_load_users() {
                 details->user_role = static_cast<User_role>(user_detail_list.at(1).toInt());
                 details->password_hash = user_detail_list.at(2);
 
+                admin_found |= details->user_role == USER_ROLE_ADMINISTRATOR;
+
                 qDebug() << "User" << details->username << "details loaded";
 
                 _all_users[details->username] = details;
@@ -338,8 +364,9 @@ bool Authentication_manager::_load_users() {
     settings.endGroup();
 
     // Create a default user if no users exist
-    if (_all_users.empty()) {
-        qDebug() << "No users defined. Creating default administrator account";
+    if (!admin_found) {
+
+        qDebug() << "No admin defined. Creating default administrator account";
         User_details* details = new User_details;
         details->username = DEFAULT_ADMIN_USERNAME;
         details->user_role = USER_ROLE_ADMINISTRATOR;
@@ -353,18 +380,17 @@ bool Authentication_manager::_load_users() {
         _all_users[details->username] = details;
    }
 
+    emit signal_users_updated();
+
     return success;
 }
 
 //------------------------------------------------------------------------------
 /// Saves the list of all available users
-bool Authentication_manager::_save_users() {
+bool Authentication_manager::_save_users(QSettings& settings) {
     qDebug() << "Saving all users";
 
     bool success = true;
-
-    // Create object for saving password
-    QSettings settings(ORGANISATION, APPLICATION_NAME, this);
 
     // Store passwords in Passwords section
     settings.beginGroup("Passwords");

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>294</width>
+    <width>356</width>
     <height>257</height>
    </rect>
   </property>
@@ -14,33 +14,12 @@
    <string>Manage Users</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0">
+   <item row="0" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Current Users</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
-       <widget class="QPushButton" name="btn_add">
-        <property name="text">
-         <string>Add...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="btn_remove">
-        <property name="text">
-         <string>Remove</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="btn_edit">
-        <property name="text">
-         <string>Edit...</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0" colspan="3">
        <widget class="QTableWidget" name="table_users">
         <property name="editTriggers">
@@ -67,11 +46,54 @@
         </column>
        </widget>
       </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="btn_add">
+        <property name="text">
+         <string>Add...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="btn_remove">
+        <property name="text">
+         <string>Remove</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="btn_edit">
+        <property name="text">
+         <string>Edit...</string>
+        </property>
+       </widget>
+      </item>
      </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QPushButton" name="btn_export">
+     <property name="text">
+      <string>Export...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="btn_restore">
+     <property name="text">
+      <string>Restore...</string>
+     </property>
     </widget>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>table_users</tabstop>
+  <tabstop>btn_add</tabstop>
+  <tabstop>btn_remove</tabstop>
+  <tabstop>btn_edit</tabstop>
+  <tabstop>btn_export</tabstop>
+  <tabstop>btn_restore</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

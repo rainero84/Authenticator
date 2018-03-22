@@ -21,7 +21,14 @@ MainWindow::MainWindow(Authentication_manager* authentication_manager, QWidget *
     // Add the label to the status bar indicating whether logged in or not
     this->statusBar()->addPermanentWidget(_login_status);
 
+    // Display user name
     _login_status->setText(_authentication_manager->get_logged_in_user_name());
+
+    if (_authentication_manager->logged_in() && _authentication_manager->get_logged_in_user_role() == USER_ROLE_ADMINISTRATOR) {
+        ui->actionManage_Users->setVisible(true);
+    } else {
+        ui->actionManage_Users->setVisible(false);
+    }
 }
 
 //------------------------------------------------------------------------------

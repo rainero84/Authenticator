@@ -70,6 +70,7 @@
  </widget>
  <tabstops>
   <tabstop>edit_username</tabstop>
+  <tabstop>edit_password</tabstop>
   <tabstop>combo_role</tabstop>
   <tabstop>btn_ok</tabstop>
   <tabstop>btn_cancel</tabstop>
