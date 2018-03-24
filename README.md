@@ -1,6 +1,6 @@
 # Authenticator
 
-This is an exaple project created for a client.
+This is an example project created for a client.
 
 The client required a Login Screen for his applications.
 
